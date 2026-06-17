@@ -1,22 +1,32 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
     name: agromind-auth-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/agromind_ai
-    username: postgres
-    password: root
+    # Railway provides DATABASE_URL — used in production
+    # Local fallback: localhost PostgreSQL
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/agromind_ai}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:root}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 5
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
+
+  # Allow Vercel frontend (CORS)
+  web:
+    cors:
+      allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
 
 app:
   jwt:
@@ -26,3 +36,6 @@ app:
   google:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+
