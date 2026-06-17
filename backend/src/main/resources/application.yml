@@ -5,15 +5,17 @@ spring:
   application:
     name: agromind-auth-service
   datasource:
-    # Railway provides DATABASE_URL — used in production
-    # Local fallback: localhost PostgreSQL
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/agromind_ai}
+    # Railway injects PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD automatically
+    # when Postgres is linked via Variable Reference
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:agromind_ai}
     username: ${PGUSER:postgres}
     password: ${PGPASSWORD:root}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
       maximum-pool-size: 5
+      data-source-properties:
+        sslmode: ${DB_SSL_MODE:disable}
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,19 +25,18 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
 
-  # Allow Vercel frontend (CORS)
-  web:
-    cors:
-      allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
-
 app:
   jwt:
-    # 256-bit key for HMAC-SHA256
     secret: ${JWT_SECRET:QWdyb01pbmRBaVN1cGVyU2VjcmV0S2V5Rm9ySldUVG9rZW5HZW5lcmF0aW9uUHVycG9zZTIwMjY=}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   google:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}
   cors:
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    com.agromind: INFO
 
